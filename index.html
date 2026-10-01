@@ -140,6 +140,13 @@ function render(){
     const k=el.dataset.key,isLand=land.has(k),[x,y]=k.split(":").map(Number),cs=claimsForCell(k),ids=cs.map(c=>c.user_id),mineId=currentUser?.id||"local";
     el.classList.toggle("land",isLand);el.classList.toggle("ocean",!isLand);el.classList.toggle("edit-mode",editMode);
     el.classList.toggle("claimed-you",isLand&&ids.includes(mineId));el.classList.toggle("claimed-partner",isLand&&cs.some(c=>c.user_id!==mineId));el.classList.toggle("claimed-both",isLand&&cs.length===2);el.classList.toggle("claimed-many",isLand&&cs.length>2);
+    el.style.background = "";
+    if(isLand && cs.length){
+      const colors=[...new Set(cs.map(c=>c.color==="purple"?"#a878e8":"#79c64a"))];
+      if(colors.length===1) el.style.background=colors[0];
+      else if(colors.length===2) el.style.background=`linear-gradient(135deg,${colors[0]} 0 50%,${colors[1]} 50%)`;
+      else el.style.background=`conic-gradient(${colors.map((c,i)=>`${c} ${Math.round(i*100/colors.length)}% ${Math.round((i+1)*100/colors.length)}%`).join(",")})`;
+    }
     el.classList.toggle("edge-top",isLand&&!land.has(key(x,y-1)));el.classList.toggle("edge-right",isLand&&!land.has(key(x+1,y)));el.classList.toggle("edge-bottom",isLand&&!land.has(key(x,y+1)));el.classList.toggle("edge-left",isLand&&!land.has(key(x-1,y)));
   });
   const all=remoteMode?claims.filter(c=>land.has(c.cell_key)):Object.entries(localData).filter(([k])=>land.has(k)).map(([k,v])=>({...v,cell_key:k,user_id:"local",display_name:"Ты",color:"green"}));
